@@ -1,19 +1,18 @@
 console.log("LeetCode content script loaded.");
 
-let arr =[];
-
 function goestoReqURL() {
      //goes to submission page basically and forward the required url to the next function
     const targetUrl = `${window.location.origin}/submissions/#/1`;
 
     if (window.location.href !== targetUrl) {
         window.location.href = targetUrl;
-    } else {
-        TrackSubmission(targetUrl);
     }
 }
 
-function TrackSubmission(url) {
+function TrackSubmission() {
+
+    goestoReqURL();
+    let arr =[];
 
     if(!localStorage.getItem("lastSeenProblem")){
         
@@ -24,7 +23,8 @@ function TrackSubmission(url) {
             time: elementArray[0],
             question: elementArray[1],
             questionLink : link[0].href,
-            submissionLink: link[1].href
+            submissionLink: link[1].href,
+            code : ""
         })
 
         localStorage.setItem("lastSeenProblem", arr[0].question)
@@ -55,6 +55,7 @@ function TrackSubmission(url) {
                     question : elementArray[1],
                     questionLink : link[0].href,
                     submissionLink : link[1].href,
+                    code : ""
                 })
             }
         }
@@ -64,6 +65,7 @@ function TrackSubmission(url) {
         }
     }
 
+    copythecode(arr);
 
     //this stores the name of the last elemet it detected as a string e.g 1.Two Sum from the browser  maybe from local storage
     //and check what all more new strings are added ;
@@ -73,41 +75,45 @@ function TrackSubmission(url) {
     //then this array is returned to the next functin
 }
 
-function copythecode() {
+function copythecode(arr) {
     // ye copy karega to clipboard and then ye also save karega question link
     // aur ye dono data bhej dega background.js ko 
 
-    const targetUrl = `${window.location.origin}/submissions/#/1`;
+    for(var i=0; i<arr.length; i++){
+        const targetUrl = arr[i].submissionLink;
 
-    if (window.location.href !== targetUrl) {
-        window.location.href = targetUrl;
-        return;
-    }
-
-    const scripts = document.body.querySelectorAll('script');
-    let clean = null;
-
-    // Loop to find the one with "submissionCode:"
-    for (let script of scripts) {
-        if (script.innerHTML.includes('submissionCode:')) {
-
-            const raw = script.innerHTML.split("submissionCode:")[1].split('editCodeUrl:')[0].trim().slice(1, -2);
-
-            clean = raw;
-            break;
+        if (window.location.href !== targetUrl) {
+            window.location.href = targetUrl;
+            return;
         }
-    }
 
-    if (clean) {
-        const finalCode = JSON.parse(`"${clean}"`);
+        const scripts = document.body.querySelectorAll('script');
+        let clean = null;
 
-        browser.runtime.sendMessage({
-        type: "CODE_SUBMISSION",
-        code : finalCode
-        })
+        // Loop to find the one with "submissionCode:"
+        for (let script of scripts) {
+            if (script.innerHTML.includes('submissionCode:')) {
 
-    } else {
-        console.warn('submissionCode not found in any <script> tag');
+                const raw = script.innerHTML.split("submissionCode:")[1].split('editCodeUrl:')[0].trim().slice(1, -2);
+
+                clean = raw;
+                break;
+            }
+        }
+
+        if (clean) {
+            const finalCode = JSON.parse(`"${clean}"`);
+
+            arr[i].code = finalCode;
+
+            browser.runtime.sendMessage({
+            type: "CODE_SUBMISSION",
+            arrayData : arr[i]
+            })
+
+        } else {
+            console.warn('submissionCode not found in any <script> tag');
+        }
     }
 }
 
