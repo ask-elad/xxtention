@@ -11,17 +11,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
 });
 
-function goestoReqURL() {
-     //goes to submission page basically and forward the required url to the next function
-    const targetUrl = `${window.location.origin}/submissions/#/1`;
+// function goestoReqURL() {
+//      //goes to submission page basically and forward the required url to the next function
+//     const targetUrl = `${window.location.origin}/submissions/#/1`;
 
-    if (window.location.href !== targetUrl) {
-        localStorage.setItem("resumeTracking", "true");
-        window.location.href = targetUrl;
-        return;
-    }
+//     if (window.location.href !== targetUrl) {
+//         localStorage.setItem("resumeTracking", "true");
+//         window.location.href = targetUrl;
+//         return;
+//     }
 
-}
+// }
 
 function TrackSubmission() {
 
@@ -38,6 +38,7 @@ function TrackSubmission() {
                 question: elementArray[1],
                 questionLink : link[0].href,
                 submissionLink: link[1].href,
+                fileType: elementArray[4],
                 code : ""
             })
 
@@ -69,7 +70,9 @@ function TrackSubmission() {
                         question : elementArray[1],
                         questionLink : link[0].href,
                         submissionLink : link[1].href,
+                        fileType: elementArray[4],
                         code : ""
+                        
                     })
                 }
             }
