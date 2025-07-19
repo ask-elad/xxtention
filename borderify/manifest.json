@@ -3,7 +3,6 @@
   "name": "BeatCode",
   "version": "1.0",
   "description": "Automatically pushes LeetCode accepted submissions to GitHub.",
-
   "permissions": [
     "storage",
     "tabs",
@@ -11,14 +10,15 @@
     "identity",
     "notifications",
     "https://leetcode.com/*",
-    "https://github.com/*"
+    "https://api.github.com/*"
   ],
-
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "utils/github.js",
+      "background.js"
+    ],
     "persistent": true
   },
-
   "content_scripts": [
     {
       "matches": ["https://leetcode.com/*"],
@@ -26,12 +26,8 @@
       "run_at": "document_idle"
     }
   ],
-
   "browser_action": {
-    "default_icon": {
-      "16": "icons/icon-16.png",
-      "32": "icons/icon-32.png"
-    },
     "default_title": "BeatCode"
-  }
+  },
+  "options_page": "option.html"
 }

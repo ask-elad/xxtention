@@ -1,24 +1,28 @@
-//yaha par logic aaega
-
-// settime out function jo har 10 minute pr script se kaam karwaega
-//conten.js ka data recieve karega 
-
-// structure karega 
-// notify karega jab jab ho jaega   
-console.log("✅ background.js loaded");
-
-
-chrome.runtime.onStartup.addListener(() => {
-    chrome.tabs.create({ url: "https://leetcode.com/submissions/#/1", active: false }, (tab) => {
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            func: () => {
-                chrome.runtime.sendMessage({ type: "RUN_TRACK_SUBMISSION" });
-            }
-        });
-    });
+chrome.browserAction.onClicked.addListener(tab => {
+  chrome.tabs.sendMessage(tab.id, { type: "RUN_TRACK_SUBMISSION" });
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("Received message in background.js:", message);
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (msg.type === "CODE_SUBMISSION") {
+    const submission = msg.arrayData;
+
+    window.pushSolution(submission, (err, result) => {
+      if (err) {
+        console.error("GitHub upload failed:", err);
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "icons/icon-128.png",
+          title: "BeatCode Error",
+          message: `Failed to upload ${submission.question}: ${err.message}`
+        });
+      } else {
+        chrome.notifications.create({
+          type: "basic",
+          iconUrl: "icons/icon-128.png",
+          title: "BeatCode",
+          message: `Uploaded ${submission.question}!`
+        });
+      }
+    });
+  }
 });

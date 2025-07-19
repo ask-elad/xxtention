@@ -1,12 +1,13 @@
 console.log("LeetCode content script loaded.");
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg, sender) => {
     if (msg.type === "RUN_TRACK_SUBMISSION") {
-        window.onload = () => {
-            const onSubmissionsPage = window.location.href.includes('/submissions/#/1');
-            if (onSubmissionsPage) {
-                TrackSubmission();
-            }
+        if (window.location.href.includes('/submissions/#/1')) {
+        // Already on the correct page, so track immediately
+        TrackSubmission();
+        } else {
+        // Go to the submissions page and let the script re‑inject
+        window.location.href = '/submissions/#/1';
         }
     }
 });
@@ -139,8 +140,8 @@ function copythecode(arr) {
                     const finalCode = JSON.parse(`"${clean}"`);
                     arr[currentIndex].code = finalCode;
 
-                    if (typeof browser !== 'undefined' && browser.runtime) {
-                        browser.runtime.sendMessage({
+                    if (typeof chrome !== 'undefined' && chrome.runtime) {
+                        chrome.runtime.sendMessage({
                             type: "CODE_SUBMISSION",
                             arrayData: arr[currentIndex]
                         });
@@ -167,7 +168,6 @@ function copythecode(arr) {
             }
         }, 1500); 
     }
-
     processNextSubmission();
 }
 
